@@ -24,6 +24,7 @@ for (const packageName of esbuildPackages) {
   if (!existsSync(nativeBinary)) {
     throw new Error(`Missing ${platformPackage} for ${packageName}`);
   }
+  chmodSync(nativeBinary, 0o755);
 
   if (!existsSync(binaryPath)) {
     writeFileSync(
