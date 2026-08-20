@@ -1,0 +1,19 @@
+[WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.patchedDependencies", "pnpm.overrides". See https://pnpm.io/settings for the new home of each setting.
+
+> fly-world-gadget-drone-repair@1.0.0 db:push /Users/mac/PROJECTS/fly-world-gadget-drone-repair
+> drizzle-kit generate && drizzle-kit migrate
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/Users/mac/PROJECTS/fly-world-gadget-drone-repair/drizzle.config.ts'
+Reading schema files:
+/Users/mac/PROJECTS/fly-world-gadget-drone-repair/drizzle/schema.ts
+
+3 tables
+repair_request_photos 8 columns 0 indexes 0 fks
+repair_requests 14 columns 0 indexes 0 fks
+users 9 columns 0 indexes 0 fks
+
+No schema changes, nothing to migrate 😴
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/Users/mac/PROJECTS/fly-world-gadget-drone-repair/drizzle.config.ts'
+[⣷] applying migrations...[2K[1G[⣷] applying migrations... ELIFECYCLE  Command failed with exit code 1.
