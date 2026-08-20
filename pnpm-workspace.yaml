@@ -1,6 +1,6 @@
 allowBuilds:
-  '@tailwindcss/oxide': true
-  esbuild: true
+  '@tailwindcss/oxide': false
+  esbuild: false
 
 patchedDependencies:
   wouter@3.7.1: patches/wouter@3.7.1.patch
