@@ -17,6 +17,20 @@ create table if not exists public.repair_requests (
 
 alter table public.repair_requests enable row level security;
 
+drop policy if exists "Allow repair request submissions" on public.repair_requests;
+create policy "Allow repair request submissions"
+  on public.repair_requests
+  for insert
+  to anon, authenticated
+  with check (true);
+
 insert into storage.buckets (id, name, public)
 values ('repair-damage-photos', 'repair-damage-photos', false)
 on conflict (id) do nothing;
+
+drop policy if exists "Allow repair photo uploads" on storage.objects;
+create policy "Allow repair photo uploads"
+  on storage.objects
+  for insert
+  to anon, authenticated
+  with check (bucket_id = 'repair-damage-photos');
