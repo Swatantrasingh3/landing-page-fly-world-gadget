@@ -19,6 +19,15 @@ function WhatsAppLink({ children = "WhatsApp Us", className = "" }: { children?:
   return <a className={className} href={BUSINESS.whatsapp} target="_blank" rel="noreferrer"><MessageCircle size={17} />{children}</a>;
 }
 
+function readPhotoAsBase64(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Could not read the selected photo."));
+    reader.readAsDataURL(file);
+  });
+}
+
 function CursorHalo() {
   const haloRef = useRef<HTMLDivElement>(null);
 
@@ -68,7 +77,19 @@ export default function Home() {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     setSubmitError("");
+    setSubmitted(false);
     try {
+      const photos = await Promise.all(
+        form.getAll("photos")
+          .filter((value): value is File => value instanceof File && value.size > 0)
+          .slice(0, 5)
+          .map(async (file) => ({
+            fileName: file.name,
+            mimeType: file.type || "application/octet-stream",
+            fileSize: file.size,
+            data: (await readPhotoAsBase64(file)).split(",")[1] || "",
+          })),
+      );
       await createRepair.mutateAsync({
         fullName: String(form.get("name") || ""),
         phone: String(form.get("phone") || ""),
@@ -79,9 +100,10 @@ export default function Home() {
         problemDescription: String(form.get("description") || ""),
         repairRequirement: String(form.get("requirement") || ""),
         pickupPreference: String(form.get("pickup") || ""),
+        photos,
       });
-    } catch {
-      setSubmitError("We could not save your request. Please try again or contact us directly on WhatsApp.");
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "We could not save your request. Please try again or contact us directly on WhatsApp.");
       return;
     }
     const msg = `Hello Fly World Gadget,\nI want to book a drone repair.\n\nName: ${form.get("name")}\nPhone: ${form.get("phone")}\nEmail: ${form.get("email")}\nDrone Brand: ${form.get("brand")}\nDrone Model: ${form.get("model")}\nProblem: ${form.get("problem")}\nPickup/Drop-off: ${form.get("pickup")}\nDescription: ${form.get("description")}\n\nPlease guide me with the repair process.`;
@@ -91,6 +113,7 @@ export default function Home() {
 
   return <div className="site-shell">
     <CursorHalo />
+    {(submitError || submitted) && <p className="form-note" role={submitError ? "alert" : "status"} aria-live="polite">{submitError || "Your repair request was saved successfully. WhatsApp is opening with your details."}</p>}
     <header className="nav-wrap"><nav className="nav" aria-label="Main navigation">
       <a href="#top" className="brand" onClick={() => setMenuOpen(false)}><img src="/assets/logo.png" alt="Flyworld Gadgets" /></a>
       <div className={`nav-links ${menuOpen ? "is-open" : ""}`}>{navItems.map(([label, id]) => <a key={id} href={`#${id}`} onClick={() => setMenuOpen(false)}>{label}</a>)}<a className="nav-cta" href="#book" onClick={() => setMenuOpen(false)}>Book a Repair <ArrowUpRight size={15} /></a></div>

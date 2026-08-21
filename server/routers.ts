@@ -4,6 +4,9 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { createRepairRequest } from "./db";
 import { appendRepairToExcel } from "./excel";
+import { createSupabaseRepairRequest } from "./supabase";
+import { ENV } from "./_core/env";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const appRouter = router({
@@ -33,31 +36,71 @@ export const appRouter = router({
         repairRequirement: z.string().trim().max(120).optional(),
         pickupPreference: z.string().trim().max(120).optional(),
         preferredContactMethod: z.string().trim().max(80).optional(),
+        photos: z.array(z.object({
+          fileName: z.string().trim().min(1).max(255),
+          mimeType: z.string().trim().min(1).max(120),
+          fileSize: z.number().int().nonnegative().max(15_000_000),
+          data: z.string().min(1).max(20_000_000),
+        })).max(5).default([]),
       }))
       .mutation(async ({ input }) => {
-        const id = await createRepairRequest({
-          fullName: input.fullName,
-          phone: input.phone,
-          email: input.email || null,
-          droneBrand: input.droneBrand,
-          droneModel: input.droneModel || null,
-          problemType: input.problemType,
-          problemDescription: input.problemDescription,
-          repairRequirement: input.repairRequirement || null,
-          pickupPreference: input.pickupPreference || null,
-          preferredContactMethod: input.preferredContactMethod || null,
-        });
-        await appendRepairToExcel({
-          fullName: input.fullName,
-          phone: input.phone,
-          email: input.email || "",
-          droneBrand: input.droneBrand,
-          droneModel: input.droneModel || "",
-          problemType: input.problemType,
-          problemDescription: input.problemDescription,
-          repairRequirement: input.repairRequirement || "",
-          pickupPreference: input.pickupPreference || "",
-        });
+        let id: number;
+        try {
+          ({ id } = await createSupabaseRepairRequest({
+            fullName: input.fullName,
+            phone: input.phone,
+            email: input.email || null,
+            droneBrand: input.droneBrand,
+            droneModel: input.droneModel || null,
+            problemType: input.problemType,
+            problemDescription: input.problemDescription,
+            repairRequirement: input.repairRequirement || null,
+            pickupPreference: input.pickupPreference || null,
+            photos: input.photos,
+          }));
+        } catch (error) {
+          console.error("[Supabase] Failed to save repair request:", error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "We could not save your repair request. Please try again or contact us directly on WhatsApp.",
+          });
+        }
+
+        if (ENV.databaseUrl) {
+          try {
+            await createRepairRequest({
+              fullName: input.fullName,
+              phone: input.phone,
+              email: input.email || null,
+              droneBrand: input.droneBrand,
+              droneModel: input.droneModel || null,
+              problemType: input.problemType,
+              problemDescription: input.problemDescription,
+              repairRequirement: input.repairRequirement || null,
+              pickupPreference: input.pickupPreference || null,
+              preferredContactMethod: input.preferredContactMethod || null,
+            });
+          } catch (error) {
+            console.error("[Legacy database] Failed to mirror repair request:", error);
+          }
+        }
+
+        try {
+          await appendRepairToExcel({
+            fullName: input.fullName,
+            phone: input.phone,
+            email: input.email || "",
+            droneBrand: input.droneBrand,
+            droneModel: input.droneModel || "",
+            problemType: input.problemType,
+            problemDescription: input.problemDescription,
+            repairRequirement: input.repairRequirement || "",
+            pickupPreference: input.pickupPreference || "",
+          });
+        } catch (error) {
+          console.error("[Excel] Failed to mirror repair request:", error);
+        }
+
         return { id, persisted: true } as const;
       }),
   }),
