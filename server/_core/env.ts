@@ -7,4 +7,10 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  microsoftTenantId: process.env.MICROSOFT_TENANT_ID ?? "",
+  microsoftClientId: process.env.MICROSOFT_CLIENT_ID ?? "",
+  microsoftClientSecret: process.env.MICROSOFT_CLIENT_SECRET ?? "",
+  excelDriveId: process.env.EXCEL_DRIVE_ID ?? "686B6BFFBB9F4A1D",
+  excelWorkbookItemId: process.env.EXCEL_WORKBOOK_ITEM_ID ?? "s9cdceaa4d2df4c978bd735e0e4dd3f63",
+  excelTableName: process.env.EXCEL_TABLE_NAME ?? "RepairRequests",
 };

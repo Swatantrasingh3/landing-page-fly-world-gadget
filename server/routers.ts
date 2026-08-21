@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { createRepairRequest } from "./db";
+import { appendRepairToExcel } from "./excel";
 import { z } from "zod";
 
 export const appRouter = router({
@@ -45,6 +46,17 @@ export const appRouter = router({
           repairRequirement: input.repairRequirement || null,
           pickupPreference: input.pickupPreference || null,
           preferredContactMethod: input.preferredContactMethod || null,
+        });
+        await appendRepairToExcel({
+          fullName: input.fullName,
+          phone: input.phone,
+          email: input.email || "",
+          droneBrand: input.droneBrand,
+          droneModel: input.droneModel || "",
+          problemType: input.problemType,
+          problemDescription: input.problemDescription,
+          repairRequirement: input.repairRequirement || "",
+          pickupPreference: input.pickupPreference || "",
         });
         return { id, persisted: true } as const;
       }),
