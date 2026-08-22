@@ -36,6 +36,14 @@ export const IMAGES = {
     "/assets/mavic-pro-device-jvnphoto-19.jpeg",
     "/assets/imageye___-_imgi_125_3cacdcf0f6b33fd9683e881ace3b8f54.jpg",
   ],
+  parts: [
+    ["Open frame & wiring", "/assets/Repairing 3.jpg"],
+    ["Motor and propeller", "/assets/Repairing 4.jpg"],
+    ["Flight controller", "/assets/Repairing 5.jpg"],
+    ["Bench repair detail", "/assets/Repairing 6.jpg"],
+    ["Drone body shell", "/assets/Repairing 7.jpg"],
+    ["Tools and components", "/assets/Repairing 8.jpg"],
+  ],
 };
 
 export const SERVICES = [
