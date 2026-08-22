@@ -1,5 +1,5 @@
 // Precision Atelier style reminder: editorial-industrial composition, documentary imagery, signal-red actions, calm technical voice.
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowUpRight, Check, ChevronDown, CircleDot, Menu, MessageCircle, Phone, ShieldCheck, X } from "lucide-react";
 import { BUSINESS, IMAGES, PROBLEMS, SERVICES } from "@/lib/siteConfig";
 import { trpc } from "@/lib/trpc";
@@ -26,41 +26,6 @@ function readPhotoAsBase64(file: File) {
     reader.onerror = () => reject(new Error("Could not read the selected photo."));
     reader.readAsDataURL(file);
   });
-}
-
-function CursorHalo() {
-  const haloRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const halo = haloRef.current;
-    if (!halo || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !window.matchMedia("(pointer: fine)").matches) return;
-
-    let targetX = -100;
-    let targetY = -100;
-    let currentX = targetX;
-    let currentY = targetY;
-    let frame = 0;
-    const move = (event: PointerEvent) => {
-      targetX = event.clientX;
-      targetY = event.clientY;
-      halo.classList.add("is-visible");
-    };
-    const animate = () => {
-      currentX += (targetX - currentX) * 0.16;
-      currentY += (targetY - currentY) * 0.16;
-      halo.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-      frame = requestAnimationFrame(animate);
-    };
-
-    window.addEventListener("pointermove", move);
-    frame = requestAnimationFrame(animate);
-    return () => {
-      window.removeEventListener("pointermove", move);
-      cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  return <div ref={haloRef} className="cursor-halo" aria-hidden="true" />;
 }
 
 export default function Home() {
@@ -112,7 +77,6 @@ export default function Home() {
   };
 
   return <div className="site-shell">
-    <CursorHalo />
     {(submitError || submitted) && <p className="form-note" role={submitError ? "alert" : "status"} aria-live="polite">{submitError || "Your repair request was saved successfully. WhatsApp is opening with your details."}</p>}
     <header className="nav-wrap"><nav className="nav" aria-label="Main navigation">
       <a href="#top" className="brand" onClick={() => setMenuOpen(false)}><img src="/assets/logo.png" alt="Flyworld Gadgets" /></a>
